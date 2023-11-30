@@ -79,6 +79,7 @@ public class TopicLookupBase extends PulsarWebResource {
                 })
                 .thenCompose(exist -> {
                     if (!exist) {
+                        pulsar().getBrokerService().getLookupRequestSemaphore().release();
                         throw new RestException(Response.Status.NOT_FOUND,
                                 String.format("Topic not found %s", topicName.toString()));
                     }
