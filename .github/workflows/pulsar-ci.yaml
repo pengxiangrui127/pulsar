@@ -135,7 +135,7 @@ jobs:
           }}"  >> $GITHUB_OUTPUT
 
       - name: Check if the PR has been approved for testing
-        if: ${{ steps.check_changes.outputs.docs_only != 'true' && github.repository == 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ steps.check_changes.outputs.docs_only != 'true' && github.repository == 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         env:
           GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -161,7 +161,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -173,7 +173,7 @@ jobs:
         with:
           path: |
             ~/.m2/repository/*/*/*
-            !~/.m2/repository/org/apache/pulsar
+            !~/.m2/repository/org/pengxiangrui127/pulsar
           key: ${{ runner.os }}-m2-dependencies-core-modules-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-m2-dependencies-core-modules-
@@ -213,7 +213,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -280,7 +280,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -372,7 +372,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -396,7 +396,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -454,7 +454,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -484,7 +484,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -536,7 +536,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -615,7 +615,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -709,7 +709,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -732,7 +732,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -795,7 +795,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -843,7 +843,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -895,7 +895,7 @@ jobs:
       - name: Run Trivy container scan
         id: trivy_scan
         uses: aquasecurity/trivy-action@0.26.0
-        if: ${{ github.repository == 'apache/pulsar' && github.event_name != 'pull_request' }}
+        if: ${{ github.repository == 'pengxiangrui127/pulsar' && github.event_name != 'pull_request' }}
         continue-on-error: true
         with:
           image-ref: "apachepulsar/pulsar:latest"
@@ -907,7 +907,7 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: ${{ steps.trivy_scan.outcome == 'success' && github.repository == 'apache/pulsar' && github.event_name != 'pull_request' }}
+        if: ${{ steps.trivy_scan.outcome == 'success' && github.repository == 'pengxiangrui127/pulsar' && github.event_name != 'pull_request' }}
         continue-on-error: true
         with:
           sarif_file: 'trivy-results.sarif'
@@ -943,7 +943,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -998,7 +998,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -1086,7 +1086,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -1110,7 +1110,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -1173,7 +1173,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -1213,7 +1213,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -1293,7 +1293,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -1386,7 +1386,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -1443,7 +1443,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
@@ -1511,7 +1511,7 @@ jobs:
       - name: Wait for ssh connection when build fails
         # ssh access is enabled for builds in own forks
         uses: ./.github/actions/ssh-access
-        if: ${{ failure() && github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ failure() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         continue-on-error: true
         with:
           action: wait
@@ -1525,7 +1525,7 @@ jobs:
     # run always, but skip for other repositories than apache/pulsar when a scheduled workflow is cancelled
     # this is to allow the workflow scheduled jobs to show as cancelled instead of failed since scheduled
     # jobs are not enabled for other than apache/pulsar repository.
-    if: ${{ always() && !(cancelled() && github.repository != 'apache/pulsar' && github.event_name == 'schedule') }}
+    if: ${{ always() && !(cancelled() && github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'schedule') }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     needs: [
