@@ -24,12 +24,15 @@ import io.netty.buffer.ByteBuf;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.Encoded;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.pulsar.broker.PulsarServerException;
 import org.apache.pulsar.broker.PulsarService;
 import org.apache.pulsar.broker.ServiceConfiguration;
 import org.apache.pulsar.broker.authentication.AuthenticationDataSource;
@@ -66,16 +69,22 @@ public class TopicLookupBase extends PulsarWebResource {
                 .thenCompose(__ -> validateGlobalNamespaceOwnershipAsync(topicName.getNamespaceObject()))
                 .thenCompose(__ -> validateTopicOperationAsync(topicName, TopicOperation.LOOKUP, null))
                 .thenCompose(__ -> {
+                    // Case-1: Non-persistent topic.
                     // Currently, it's hard to check the non-persistent-non-partitioned topic, because it only exists
                     // in the broker, it doesn't have metadata. If the topic is non-persistent and non-partitioned,
-                    // we'll return the true flag.
-                    CompletableFuture<Boolean> existFuture = (!topicName.isPersistent() && !topicName.isPartitioned())
-                            ? CompletableFuture.completedFuture(true)
-                            : pulsar().getNamespaceService().checkTopicExists(topicName)
-                                .thenCompose(exists -> exists ? CompletableFuture.completedFuture(true)
-                                        : pulsar().getBrokerService().isAllowAutoTopicCreationAsync(topicName));
-
-                    return existFuture;
+                    // we'll return the true flag. So either it is a partitioned topic or not, the result will be true.
+                    if (!topicName.isPersistent()) {
+                        return CompletableFuture.completedFuture(true);
+                    }
+                    // Case-2: Persistent topic.
+                    return pulsar().getNamespaceService().checkTopicExists(topicName).thenCompose(info -> {
+                        boolean exists = info.isExists();
+                        info.recycle();
+                        if (exists) {
+                            return CompletableFuture.completedFuture(true);
+                        }
+                        return pulsar().getBrokerService().isAllowAutoTopicCreationAsync(topicName);
+                    });
                 })
                 .thenCompose(exist -> {
                     if (!exist) {
@@ -133,10 +142,10 @@ public class TopicLookupBase extends PulsarWebResource {
                             pulsar().getBrokerService().getLookupRequestSemaphore().release();
                             return result.getLookupData();
                         }
-                    }).exceptionally(ex->{
-                        pulsar().getBrokerService().getLookupRequestSemaphore().release();
-                        throw FutureUtil.wrapToCompletionException(ex);
                     });
+                }).exceptionally(ex -> {
+                    pulsar().getBrokerService().getLookupRequestSemaphore().release();
+                    throw FutureUtil.wrapToCompletionException(ex);
                 });
     }
 
@@ -174,7 +183,7 @@ public class TopicLookupBase extends PulsarWebResource {
     public static CompletableFuture<ByteBuf> lookupTopicAsync(PulsarService pulsarService, TopicName topicName,
             boolean authoritative, String clientAppId, AuthenticationDataSource authenticationData, long requestId) {
         return lookupTopicAsync(pulsarService, topicName, authoritative, clientAppId,
-                authenticationData, requestId, null);
+                authenticationData, requestId, null, Collections.emptyMap());
     }
 
     /**
@@ -202,7 +211,8 @@ public class TopicLookupBase extends PulsarWebResource {
     public static CompletableFuture<ByteBuf> lookupTopicAsync(PulsarService pulsarService, TopicName topicName,
                                                               boolean authoritative, String clientAppId,
                                                               AuthenticationDataSource authenticationData,
-                                                              long requestId, final String advertisedListenerName) {
+                                                              long requestId, final String advertisedListenerName,
+                                                              Map<String, String> properties) {
 
         final CompletableFuture<ByteBuf> validationFuture = new CompletableFuture<>();
         final CompletableFuture<ByteBuf> lookupfuture = new CompletableFuture<>();
@@ -293,6 +303,7 @@ public class TopicLookupBase extends PulsarWebResource {
                         .authoritative(authoritative)
                         .advertisedListenerName(advertisedListenerName)
                         .loadTopicsInBundle(true)
+                        .properties(properties)
                         .build();
                 pulsarService.getNamespaceService().getBrokerServiceUrlAsync(topicName, options)
                         .thenAccept(lookupResult -> {
@@ -308,6 +319,7 @@ public class TopicLookupBase extends PulsarWebResource {
                             }
 
                             LookupData lookupData = lookupResult.get().getLookupData();
+                            printWarnLogIfLookupResUnexpected(topicName, lookupData, options, pulsarService);
                             if (lookupResult.get().isRedirect()) {
                                 boolean newAuthoritative = lookupResult.get().isAuthoritativeRedirect();
                                 lookupfuture.complete(
@@ -332,15 +344,36 @@ public class TopicLookupBase extends PulsarWebResource {
         return lookupfuture;
     }
 
+    /**
+     * Check if a internal client will get a null lookup result.
+     */
+    private static void printWarnLogIfLookupResUnexpected(TopicName topic, LookupData lookupData, LookupOptions options,
+                                                          PulsarService pulsar) {
+        if (!pulsar.getBrokerService().isSystemTopic(topic)) {
+            return;
+        }
+        boolean tlsEnabled = pulsar.getConfig().isBrokerClientTlsEnabled();
+        if (!tlsEnabled && StringUtils.isBlank(lookupData.getBrokerUrl())) {
+            log.warn("[{}] Unexpected lookup result: brokerUrl is required when TLS isn't enabled. options: {},"
+                + " result {}", topic, options, lookupData);
+        } else if (tlsEnabled && StringUtils.isBlank(lookupData.getBrokerUrlTls())) {
+            log.warn("[{}] Unexpected lookup result: brokerUrlTls is required when TLS is enabled. options: {},"
+                    + " result {}", topic, options, lookupData);
+        }
+    }
+
     private static void handleLookupError(CompletableFuture<ByteBuf> lookupFuture, String topicName, String clientAppId,
                                    long requestId, Throwable ex){
-        final Throwable unwrapEx = FutureUtil.unwrapCompletionException(ex);
+        Throwable unwrapEx = FutureUtil.unwrapCompletionException(ex);
         final String errorMsg = unwrapEx.getMessage();
+        if (unwrapEx instanceof PulsarServerException) {
+            unwrapEx = FutureUtil.unwrapCompletionException(unwrapEx.getCause());
+        }
         if (unwrapEx instanceof IllegalStateException) {
             // Current broker still hold the bundle's lock, but the bundle is being unloading.
             log.info("Failed to lookup {} for topic {} with error {}", clientAppId, topicName, errorMsg);
             lookupFuture.complete(newLookupErrorResponse(ServerError.MetadataError, errorMsg, requestId));
-        } else if (unwrapEx instanceof MetadataStoreException){
+        } else if (unwrapEx instanceof MetadataStoreException) {
             // Load bundle ownership or acquire lock failed.
             // Differ with "IllegalStateException", print warning log.
             log.warn("Failed to lookup {} for topic {} with error {}", clientAppId, topicName, errorMsg);
