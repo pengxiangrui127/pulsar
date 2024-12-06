@@ -85,7 +85,7 @@ jobs:
       java_non_tests: ${{ steps.changes.outputs.java_non_tests }}
     steps:
       - name: Cancel scheduled jobs in forks by default
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' }}
         uses: actions/github-script@v6
         with:
           script: |
