@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Cancel scheduled jobs in forks by default
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'schedule' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'schedule' }}
         uses: actions/github-script@v6
         with:
           script: |
@@ -135,7 +135,7 @@ jobs:
           }}"  >> $GITHUB_OUTPUT
 
       - name: Check if the PR has been approved for testing
-        if: ${{ steps.check_changes.outputs.docs_only != 'true' && github.repository == 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ steps.check_changes.outputs.docs_only != 'true' && github.repository == 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         env:
           GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -170,7 +170,7 @@ jobs:
 
       - name: Setup ssh access to build runner VM
         # ssh access is enabled for builds in own forks
-        if: ${{ github.repository != 'apache/pulsar' && github.event_name == 'pull_request' }}
+        if: ${{ github.repository != 'pengxiangrui127/pulsar' && github.event_name == 'pull_request' }}
         uses: ./.github/actions/ssh-access
         continue-on-error: true
         with:
