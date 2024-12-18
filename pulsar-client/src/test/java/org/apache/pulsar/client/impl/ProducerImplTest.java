@@ -22,12 +22,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
+
 import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
+import org.apache.pulsar.client.impl.conf.ProducerConfigurationData;
 import org.apache.pulsar.client.impl.metrics.LatencyHistogram;
+import org.apache.pulsar.client.impl.metrics.InstrumentProvider;
 import org.apache.pulsar.common.api.proto.MessageMetadata;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
@@ -66,6 +72,34 @@ public class ProducerImplTest {
                 .defaultAnswer(Mockito.CALLS_REAL_METHODS));
         assertTrue(producer.populateMessageSchema(msg, null));
         verify(msg).setSchemaState(MessageImpl.SchemaState.Ready);
+    }
+
+     @Test
+    public void testPendingMessage() {
+        ClientCnx clientCnx = mock(ClientCnx.class);
+        CompletableFuture<ProducerResponse> tCompletableFuture = new CompletableFuture<>();
+        tCompletableFuture.completeExceptionally(new PulsarClientException("error"));
+        when(clientCnx.sendRequestWithId(Mockito.any(), Mockito.anyLong())).thenReturn(tCompletableFuture);
+
+        PulsarClientImpl client = mock(PulsarClientImpl.class);
+        Mockito.doReturn(1L).when(client).newProducerId();
+
+        ClientConfigurationData clientConf = new ClientConfigurationData();
+        clientConf.setStatsIntervalSeconds(-1);
+        Mockito.doReturn(clientConf).when(client).getConfiguration();
+        Mockito.doReturn(new InstrumentProvider(null)).when(client).instrumentProvider();
+
+        ConnectionPool connectionPool = mock(ConnectionPool.class);
+        Mockito.doReturn(1).when(connectionPool).genRandomKeyToSelectCon();
+        Mockito.doReturn(connectionPool).when(client).getCnxPool();
+
+        ProducerConfigurationData producerConf = new ProducerConfigurationData();
+        producerConf.setSendTimeoutMs(-1);
+        ProducerImpl<?> producer = Mockito.spy(new ProducerImpl<>(client, "topicName", producerConf, null, 0, null, null, Optional.empty()));
+        Mockito.doReturn(clientCnx).when(producer).cnx();
+        CompletableFuture<Void> voidCompletableFuture = producer.closeAsync();
+        verify(producer).closeAndClearPendingMessages();
+        assertTrue(voidCompletableFuture.isCompletedExceptionally());
     }
 
 }
