@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import io.netty.util.HashedWheelTimer;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
@@ -75,7 +76,7 @@ public class ProducerImplTest {
     }
 
     @Test
-    public void testPendingMessage() {
+    public void testClearPendingMessageWhenCloseAsync() {
         ClientCnx clientCnx = mock(ClientCnx.class);
         CompletableFuture<ProducerResponse> tCompletableFuture = new CompletableFuture<>();
         tCompletableFuture.completeExceptionally(new PulsarClientException("error"));
