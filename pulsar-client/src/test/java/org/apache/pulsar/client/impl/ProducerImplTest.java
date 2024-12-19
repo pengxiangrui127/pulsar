@@ -74,7 +74,7 @@ public class ProducerImplTest {
         verify(msg).setSchemaState(MessageImpl.SchemaState.Ready);
     }
 
-     @Test
+    @Test
     public void testPendingMessage() {
         ClientCnx clientCnx = mock(ClientCnx.class);
         CompletableFuture<ProducerResponse> tCompletableFuture = new CompletableFuture<>();
@@ -92,6 +92,10 @@ public class ProducerImplTest {
         ConnectionPool connectionPool = mock(ConnectionPool.class);
         Mockito.doReturn(1).when(connectionPool).genRandomKeyToSelectCon();
         Mockito.doReturn(connectionPool).when(client).getCnxPool();
+
+        HashedWheelTimer timer = mock(HashedWheelTimer.class);
+        doNothing().when(timer).newTimeout(any(),anyLong(),any());
+        Mockito.doReturn(timer).when(client).timer();
 
         ProducerConfigurationData producerConf = new ProducerConfigurationData();
         producerConf.setSendTimeoutMs(-1);
