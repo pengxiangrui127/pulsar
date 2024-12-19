@@ -95,7 +95,7 @@ public class ProducerImplTest {
         Mockito.doReturn(connectionPool).when(client).getCnxPool();
 
         HashedWheelTimer timer = mock(HashedWheelTimer.class);
-        doNothing().when(timer).newTimeout(any(),anyLong(),any());
+        Mockito.doNothing().when(timer).newTimeout(Mockito.any(), Mockito.anyLong(), Mockito.any());
         Mockito.doReturn(timer).when(client).timer();
 
         ProducerConfigurationData producerConf = new ProducerConfigurationData();
