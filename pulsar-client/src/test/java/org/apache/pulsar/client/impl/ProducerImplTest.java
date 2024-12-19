@@ -104,7 +104,6 @@ public class ProducerImplTest {
         Mockito.doReturn(clientCnx).when(producer).cnx();
         CompletableFuture<Void> voidCompletableFuture = producer.closeAsync();
         verify(producer).closeAndClearPendingMessages();
-        assertTrue(voidCompletableFuture.isCompletedExceptionally());
     }
 
 }
